@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mountain Medicine - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/mountain_logo.png">
+  <style>
+    :root {
+      --purple: #6C4AB6;
+      --light-purple: #B8A4D4;
+      --bg: #f9f9fb;
+      --text: #222;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo img {
+      max-width: 300px;
+      height: auto;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 0 0 1rem;
+      color: #555;
+      font-size: 1rem;
+    }
+
+    .login-button {
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .login-button:hover {
+      background: var(--light-purple);
+    }
+
+    footer {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 2rem;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSpwzSf8hXxb4rBk-u8JPyX7Ha4kGoS8o",
+      authDomain: "mountainmedicine-6e572.web.app",
+      projectId: "mountainmedicine-6e572",
+      storageBucket: "mountainmedicine-6e572.appspot.com",
+      messagingSenderId: "1081705872512",
+      appId: "1:1081705872512:web:0ddf126c4737e47fd9ba65",
+      measurementId: "G-NCMCE3BBPL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    function detectDevice() {
+      return /iphone|ipad|android/i.test(navigator.userAgent) ? "mobile" : "desktop";
+    }
+
+    function redirect(token, device) {
+      window.location.href = `https://mountainmedicine.streamlit.app/?token=${token}&device=${device}`;
+    }
+
+    function saveToken(token, device) {
+      localStorage.setItem("mm_token", token);
+      localStorage.setItem("mm_device", device);
+      const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+      localStorage.setItem("mm_token_expiry", String(expiry));
+    }
+
+    function redirectIfReady() {
+      window.location.href = "/redirect.html";
+    }
+
+    // Modern persistent login flow
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const token = await user.getIdToken(true);  // force refresh
+          const device = detectDevice();
+          saveToken(token, device);
+          window.location.href = "/redirect.html";
+        } catch (err) {
+          console.error("Token refresh failed:", err);
+        }
+      } else {
+        console.log("No user detected. Waiting for manual login.");
+      }
+    });
+
+    window.login = function() {
+      signInWithRedirect(auth, provider);
+    }
+  </script>
+</head>
+<body>
+  <div class="login-box">
+    <div class="logo">
+      <img src="/mountain_logo.png" alt="Mountain Medicine Logo" />
+    </div>
+    <p>Bringing humanity closer through man's original primal ceremony.</p>
+    <label style="margin-bottom:0.5rem;display:flex;align-items:center;gap:4px;">
+      <input type="checkbox" id="rememberMe" /> Remember me for 30 days
+    </label>
+    <button class="login-button" id="loginBtn" onclick="login()">🔐 Login with Google</button>
+    <div id="pleaseWait" style="display:none;margin-top:1rem;font-weight:600;">Please wait…</div>
+    <footer>&copy; 2025 Mountain Medicine</footer>
+  </div>
+  <a href="/public-recipes.html" style="position: fixed; bottom: 8px; right: 8px; font-size: 0.75rem; color: #666; text-decoration: none;">View Recipes</a>
+</body>
+</html>
