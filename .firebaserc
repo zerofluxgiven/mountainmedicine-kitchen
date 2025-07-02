@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "mountainmedicine-6e572"
+  },
+  "targets": {
+    "mountainmedicine-6e572": {
+      "hosting": {
+        "kitchen": [
+          "mountainmedicine-kitchen"
+        ]
+      }
+    }
   }
 }
